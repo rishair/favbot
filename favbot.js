@@ -4,7 +4,7 @@
 
   twitter = require('twit');
 
-  settings = require('./settings');
+  settings = require('./settings.local');
 
   tweeper = new twitter(settings.twitter);
 
@@ -18,9 +18,10 @@
 
   favoriteTweet = function(tweet) {
     return tweeper.post('favorites/create', {
-      id: "" + tweet.id
+      id: "" + tweet.id_str
     }, function(errors, tweet) {
       if (errors) {
+        log(errors);
         return;
       }
       return log('Tweet by @' + tweet.user.screen_name + ' favorited!');
@@ -33,10 +34,10 @@
       track: settings.keywords.join(', ')
     });
     return stream.on('tweet', function(tweet) {
-      log('  Found a tweet from @' + tweet.user.screen_name + " (waiting for " + settings.delay + "s)");
+      log('  Found a tweet from @' + tweet.user.screen_name + " (id " + tweet.id_str + ", waiting for " + settings.delay + "s)");
       log('  ' + tweet.text);
       return delay(settings.delay * 1000, function() {
-        return favoriteFunc(tweet);
+        return favoriteTweet(tweet);
       });
     });
   };
